@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap');
+* {
+  font-family: 'Noto Sans KR', sans-serif;
+}
+*:focus {
+  outline: rgb(255, 187, 0) 2px solid;
+}
+/* 헤더 부분 css */
+.App {
+  max-width: 900px;
+  min-width: 300px;
+  margin: 0 auto;
+}
+.title {
+  display: inline-block;
+}
+.header strong > span {
+  font-size: 1.6em;
+}
+.header strong {
+  font-family: 'Nanum Myeongjo', serif;
+  font-size: 20px;
+  margin-top: 10px;
+}
+.header strong p {
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  font-size: 0.7em;
+  color: rgb(224, 224, 224);
+}
+@media screen and (max-width:400px) {
+  .header strong p {
+    display: none;
+  }
+}
+.container {
+  border-radius: 8px;
+  background-color: rgb(246, 246, 246);
+  padding: 10px 20px;
+}
+.policyCon > h2 {
+  margin: 5px 0;
+}
+.policyCon > h3 {
+  margin-top: 15px;
+  margin-bottom: 5px;
+  color: rgb(255, 116, 116);
+}
+.form {
+  margin: 3px;
+  padding: 8px;
+}
+.form > input, .form > select {
+  font-size: 1em;
+  background-color: rgb(255, 166, 166);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  padding: 8px;
+  margin: 5px;
+}
+.form > input {
+  width: 21 em;
+}
