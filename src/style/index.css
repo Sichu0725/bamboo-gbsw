@@ -39,6 +39,7 @@
   border-radius: 8px;
   background-color: rgb(246, 246, 246);
   padding: 10px 20px;
+  margin: 15px 0;
 }
 .policyCon > h2 {
   margin: 5px 0;
@@ -52,7 +53,7 @@
   margin: 3px;
   padding: 8px;
 }
-.form > input, .form > select {
+.form  :is(input, textarea, select, button), .card span {
   font-size: 1em;
   background-color: rgb(255, 166, 166);
   border: none;
@@ -62,5 +63,28 @@
   margin: 5px;
 }
 .form > input {
-  width: 21 em;
+  width: 22.1em;
+}
+.form > textarea {
+  resize: none;
+  width: 53em;
+  overflow: hidden;
+}
+@media screen and (max-width:500px) {
+  .form > :is(textarea, input) {
+    width: 19.6em;
+  }
+}
+.card > h3 {
+  color: rgb(255, 92, 92);
+}
+.card span {
+  display: inline-block;
+  margin: 0;
+  margin-bottom: 5px;
+  padding: 5px;
+  color: rgb(255, 255, 255);
+}
+:is(input, textarea)::placeholder {
+  color: white;
 }
