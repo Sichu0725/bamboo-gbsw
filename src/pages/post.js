@@ -1,9 +1,13 @@
 import useSWR from 'swr'
 import fetcher from '../utils/fetcher'
 import moment from 'moment'
-export const Post = () => {
-	const { data, error } = useSWR('bamboo_server.gbsw.hs.kr/get?', fetcher)
-
+import QueryString from 'qs'
+import xss from 'xss'
+export const Post = ({ location }) => {
+	const query = QueryString.parse(location.search, {
+		ignoreQueryPrefix: true
+	})
+	const { data, error } = useSWR('http://localhost/getPost?id=' + query.id, fetcher)
 	const style1 = {
 		fontSize:"18px",
 		fontWeight: "ligther"
@@ -28,18 +32,28 @@ export const Post = () => {
 			</div>
 		)
 	} else {
-		return (
-			<div>
-				<div className="container card">
-					<h3>#{data.id}번째 글</h3>
-					<p>{moment(data.date).format('YYYY년 MM월 DD일')}</p>
-					<h3 style={{color:"black"}}>{data.title}</h3>
-					<p style={style1}>
-						{data.content}
-					</p>
-					<span>{data.category}</span>
+		if (data.Success === true) {
+			return (
+				<div>
+					<div className="container card">
+						<h3>#{data.post.id}번째 글</h3>
+						<p>{moment(data.post.date).format('YYYY년 MM월 DD일')}</p>
+						<h3 style={{color:"black"}}>{data.post.title}</h3>
+						<div style={style1} dangerouslySetInnerHTML={{ __html: xss(data.post.content) }} />
+						<span>{data.post.category}</span>
+					</div>
 				</div>
-			</div>
-		)
+			)
+		} else {
+			return(
+				<div>
+					<div className="container card">
+						<h3>#0번째 글</h3>
+						<p>YYYY년 MM월 DD일</p>
+						<h3 style={{color:"black"}}>없는 글 입니다.</h3>
+					</div>
+				</div>
+			)
+		}
 	}
 }

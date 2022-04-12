@@ -3,20 +3,21 @@ import { db } from '../utils/database'
 import ranStr from '../utils/ranStr'
 import hash from '../utils/hash'
 import isNumber from '../utils/isNumber'
-import { Question, getQuestion, getAllQuestion, checkQuestion } from '../utils/Question'
+import cors from 'cors'
+import { Question, getQuestion, checkQuestion } from '../utils/Question'
 const router = Router()
 const Master_Key = 'xogur38997'
-router.use(express.json())
 
+router.use(express.json())
+router.use(cors())
 router.get('/', (req, res) => {
-  res.sendStatus(200)
+  res.sendStatus(200).send('Bamboo Express Your IP:' + req.ip)
 })
 
 router.post('/upload', async (req, res) => {
-  const { data, category, title, Question_id, Question_Answer, password } = req.body
+  const { content, category, title, Question_id, Question_Answer, password } = req.body
   try {
-    console.log(req.body)
-    if (!data || !category || !title || !Question_Answer || !Question_id) {
+    if (!content || !category || !title || !Question_Answer || !Question_id) {
       await db.insert({
         type: 'upload',
         status: 0,
@@ -96,7 +97,7 @@ router.post('/upload', async (req, res) => {
           category: category_.title,
           status: 1,
           title: title,
-          content: data,
+          content,
           password: hash(password + salt),
           salt, 
         }).into('bamboo')
@@ -124,17 +125,46 @@ router.post('/upload', async (req, res) => {
   }
 })
 
-router.post('/form', async (req, res) => {
+router.get('/form', async (req, res) => {
   try {
-    const category = await db.select('title, creater').from('categorys')
+    const category = await db.select('title', 'creater').from('categorys')
     return res.send({
       Success: true,
       Status: 'Success',
       reason: '정상적으로 처리되었습니다.',
-      Question: await getQuestion(),
-      category 
+      Question: (await getQuestion()).Question,
+      category
     })
   } catch(e: any) {
+    return res.send({
+      Success: e.Success,
+      Status: e.Status,
+      Code: e.Code,
+      reason: e.reason
+    })
+  }
+})
+
+router.get('/getPost', async(req, res) => {
+  const { id } = req.query
+  try {
+    const [post] = await db.select('id', 'category', 'title', 'content', 'date').from('bamboo').where('id', String(id)).andWhere('status', 1)
+    if (!post) {
+      throw({
+        Success: false,
+        Status: 'Error',
+        Code: '003-1',
+        reason: '존재하지 않는 게시물입니다.'
+      })
+    } else {
+      return res.send({
+        Success: true,
+        Status: 'Success',
+        reason: '정상적으로 처리되었습니다.',
+        post
+      })
+    }
+  } catch (e: any) {
     return res.send({
       Success: e.Success,
       Status: e.Status,
@@ -265,16 +295,14 @@ router.post('/update', async (req, res) => {
   }
 })
 
-router.post('/get', async (req, res) => {
+router.get('/get', async (req, res) => {
   try {
-    const { limit, offset, category } = req.body
-    if (limit || offset || limit > 25) { 
+    const { limit, offset, category } = req.query
+    if (limit || offset || Number(limit) > 25) { 
       await db.insert({ 
         type: 'get', 
         status: 0, 
-        
         Internet_Protocol: req.ip, 
-         
       }).into('logs')
 
       throw ({
@@ -285,13 +313,11 @@ router.post('/get', async (req, res) => {
       })
     }
 
-    if (limit < 0 || offset < 0 || limit > 25 || isNumber(limit) === false || isNumber(offset) === false) { 
+    if (Number(limit) < 0 || Number(offset) < 0 || Number(limit) > 25 || isNumber(String(limit)) === false || isNumber(String(offset)) === false) { 
       await db.insert({ 
         type: 'get', 
         status: 0, 
-        
         Internet_Protocol: req.ip, 
-         
       }).into('logs')
 
       throw ({
@@ -303,7 +329,7 @@ router.post('/get', async (req, res) => {
     }
 
     if (category) {
-      const bamboo = await db.select('id', 'data', 'date', 'category').from('bamboo').where('status', 1).andWhere('category', category).orderBy('id', 'desc').limit(limit).offset(offset)
+      const bamboo = await db.select('id', 'data', 'date', 'category').from('bamboo').where('status', 1).andWhere('category', String(category)).orderBy('id', 'desc').limit(Number(limit)).offset(Number(offset))
       if (!bamboo) {
         await db.insert({ 
           type: 'get', 
@@ -327,12 +353,12 @@ router.post('/get', async (req, res) => {
         return res.send({
           Success: true,
           Status: 'Success',
-          data: bamboo,
+          bamboo: bamboo,
           reason: '정상적으로 처리되었습니다.'
         })
       }
     }
-    const bamboo = await db.select('id', 'data', 'date', 'category').from('bamboo').where('status', 1).orderBy('id', 'desc').limit(limit).offset(offset)
+    const bamboo = await db.select('id', 'data', 'date', 'category').from('bamboo').where('status', 1).orderBy('id', 'desc').limit(20).offset(Number(offset))
     
     await db.insert({ 
       type: 'get', 

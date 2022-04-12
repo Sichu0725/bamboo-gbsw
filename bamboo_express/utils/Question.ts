@@ -8,19 +8,12 @@ export async function Question(Q: string, str: string): Promise<boolean> {
 }
 
 export async function checkQuestion(Q: string) {
-	const [question] = await db.select('*').from('questions').where({ id: Q })
+	const [question] = await db.select('*').from('question').where({ id: Q })
 	if (!question) return false
 	else return true
 }
 
 export async function getQuestion() {
-	const questions = await db.select('*').from('questions')
-	const ran = Math.floor(Math.random() * questions.length)
-	const [question] = await db.select('*').from('questions').where({ id: ran })
-	return question
-}
-
-export async function getAllQuestion() {
-	const questions = await db.select('*').from('questions')
-	return questions
+	const [question] = await db.select('id', 'question').from('questions').orderByRaw('RAND()').limit(1)
+	return { Question: { id: question.id, question: question.question } }
 }
