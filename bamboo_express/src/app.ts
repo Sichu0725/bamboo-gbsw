@@ -337,9 +337,7 @@ router.post('/get', async (req, res) => {
     await db.insert({ 
       type: 'get', 
       status: 1, 
-      
       Internet_Protocol: req.ip, 
-       
     }).into('logs')
 
     return res.send({
