@@ -16,7 +16,6 @@ export const Header = (props) => {
         <span>경</span>소고 
         <span>대</span>나무 
         <span>숲</span>
-        <p>(부제 : 죽창의 숲)</p>
       </strong>
     </div>
   )

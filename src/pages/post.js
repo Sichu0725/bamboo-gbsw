@@ -1,28 +1,45 @@
 import useSWR from 'swr'
 import fetcher from '../utils/fetcher'
-
+import moment from 'moment'
 export const Post = () => {
-	// const { data, error } = useSWR('bamboo_server.gbsw.hs.kr/post?', fetcher)
+	const { data, error } = useSWR('bamboo_server.gbsw.hs.kr/get?', fetcher)
 
-	// if (error) return <div>failed to load</div>
+	const style1 = {
+		fontSize:"18px",
+		fontWeight: "ligther"
+	}
 
-  const style1 = {
-    fontSize:"18px",
-    fontWeight: "ligther"
-  }
-	return (
-    <div>
-    <div className="container card">
-      <h3>#1번째 글</h3>
-      <p>2022년 4월 10일</p>
-      <h3 style={{color:"black"}}>제목</h3>
-      <p style={style1}>
-        제발 노래 틀 때 스피커로 틀지마세요. 학교 혼자 쓰나요;;
-        왜 좋아하지도 않는 노래를 아침 시간마다 들어야 되는지 모르겠네요.
-        주의해주시길 바랍니다.
-      </p>
-      <span>학교생활</span>
-    </div>
-  </div>
-  )
+	if (error) { 
+		return (
+			<div>
+				<div className="container card">
+					<h3>Failed To Load</h3>
+				</div>
+			</div>
+		)
+	}
+
+	if (!data) {
+		return (
+			<div>
+				<div className="container card">
+					<h3>Loading ...</h3>
+				</div>
+			</div>
+		)
+	} else {
+		return (
+			<div>
+				<div className="container card">
+					<h3>#{data.id}번째 글</h3>
+					<p>{moment(data.date).format('YYYY년 MM월 DD일')}</p>
+					<h3 style={{color:"black"}}>{data.title}</h3>
+					<p style={style1}>
+						{data.content}
+					</p>
+					<span>{data.category}</span>
+				</div>
+			</div>
+		)
+	}
 }

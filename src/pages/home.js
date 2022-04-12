@@ -1,4 +1,4 @@
-import { Form } from "./form"
+import { Form } from "../components/form"
 
 export const Home = () => {
   const style1 = {

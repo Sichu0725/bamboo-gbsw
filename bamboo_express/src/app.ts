@@ -2,7 +2,6 @@ import express, { Router } from 'express'
 import { db } from '../utils/database'
 import ranStr from '../utils/ranStr'
 import hash from '../utils/hash'
-import { filter } from '../utils/filter'
 import isNumber from '../utils/isNumber'
 import { Question, getQuestion, getAllQuestion, checkQuestion } from '../utils/Question'
 const router = Router()
@@ -22,7 +21,6 @@ router.post('/upload', async (req, res) => {
         type: 'upload',
         status: 0,
         Internet_Protocol: req.ip,
-        date: Date.now()
       }).into('logs')
       
       throw ({
@@ -51,7 +49,6 @@ router.post('/upload', async (req, res) => {
             type: 'upload',
             status: 0,
             Internet_Protocol: req.ip,
-            date: Date.now()
           }).into('logs')
           
           throw ({
@@ -66,8 +63,7 @@ router.post('/upload', async (req, res) => {
           await db.insert({ 
             type: 'upload',
             status: 0,
-            Internet_Protocol: req.ip, 
-            date: Date.now() 
+            Internet_Protocol: req.ip,
           }).into('logs')
 
           throw ({
@@ -84,7 +80,6 @@ router.post('/upload', async (req, res) => {
             type: 'upload', 
             status: 0, 
             Internet_Protocol: req.ip, 
-            date: Date.now() 
           }).into('logs')
 
           throw ({
@@ -100,18 +95,16 @@ router.post('/upload', async (req, res) => {
           Internet_Protocol: req.ip,
           category: category_.title,
           status: 1,
-          title: filter(title),
-          data: filter(data),
+          title: title,
+          content: data,
           password: hash(password + salt),
           salt, 
-          date: Date.now()
         }).into('bamboo')
 
         await db.insert({ 
           type: 'upload', 
           status: 1,
           Internet_Protocol: req.ip, 
-          date: Date.now() 
         }).into('logs')
 
         return res.send({ 
@@ -131,45 +124,15 @@ router.post('/upload', async (req, res) => {
   }
 })
 
-router.post('/getQuestion', async (req, res) => {
+router.post('/form', async (req, res) => {
   try {
-    await db.insert({
-      type: 'getQuestion',
-      status: 1,
-      Internet_Protocol: req.ip,
-      date: Date.now()
-    }).into('logs')
-
+    const category = await db.select('title, creater').from('categorys')
     return res.send({
       Success: true,
       Status: 'Success',
       reason: '정상적으로 처리되었습니다.',
-      data: await getQuestion()
-    })
-  } catch(e: any) {
-    res.send({
-      Success: e.Success,
-      Status: e.Status,
-      Code: e.Code,
-      reason: e.reason
-    })
-  }
-})
-
-router.post('/getAllQuestion', async (req, res) => {
-  try {
-    await db.insert({
-      type: 'getAllQuestion',
-      status: 1,
-      Internet_Protocol: req.ip,
-      date: Date.now()
-    }).into('logs')
-
-    return res.send({
-      Success: true,
-      Status: 'Success',
-      reason: '정상적으로 처리되었습니다.',
-      data: await getAllQuestion()
+      Question: await getQuestion(),
+      category 
     })
   } catch(e: any) {
     return res.send({
@@ -189,7 +152,6 @@ router.post('/delete', async (req, res) => {
         type: 'delete',
         status: 0,
         Internet_Protocol: req.ip,
-        date: Date.now()
       }).into('logs')
 
       throw({
@@ -205,7 +167,7 @@ router.post('/delete', async (req, res) => {
           type: 'delete', 
           status: 0,
           Internet_Protocol: req.ip, 
-          date: Date.now() 
+           
         }).into('logs')
         
         throw ({
@@ -221,9 +183,7 @@ router.post('/delete', async (req, res) => {
         await db.insert({ 
           type: 'delete', 
           status: 1, 
-          
           Internet_Protocol: req.ip, 
-          date: Date.now() 
         }).into('logs')
         
         return res.send({
@@ -250,9 +210,7 @@ router.post('/update', async (req, res) => {
       await db.insert({
         type: 'update',
         status: 0,
-        
         Internet_Protocol: req.ip,
-        date: Date.now()
       }).into('logs')
 
       throw({
@@ -269,9 +227,7 @@ router.post('/update', async (req, res) => {
       await db.insert({ 
         type: 'update', 
         status: 0, 
-        
         Internet_Protocol: req.ip, 
-        date: Date.now() 
       }).into('logs')
 
       throw ({
@@ -284,15 +240,13 @@ router.post('/update', async (req, res) => {
 
     if (bamboo.password === hash(password + bamboo.salt) || bamboo.password === Master_Key) {
       await db.update({ 
-        data: await filter(data) 
+        content: data 
       }).from('bamboo').where({ id: id })
-
+ 
       await db.insert({ 
         type: 'update', 
         status: 1, 
-        
         Internet_Protocol: req.ip, 
-        date: Date.now() 
       }).into('logs')
 
       return res.send({ 
@@ -320,7 +274,7 @@ router.post('/get', async (req, res) => {
         status: 0, 
         
         Internet_Protocol: req.ip, 
-        date: Date.now() 
+         
       }).into('logs')
 
       throw ({
@@ -337,7 +291,7 @@ router.post('/get', async (req, res) => {
         status: 0, 
         
         Internet_Protocol: req.ip, 
-        date: Date.now() 
+         
       }).into('logs')
 
       throw ({
@@ -354,9 +308,7 @@ router.post('/get', async (req, res) => {
         await db.insert({ 
           type: 'get', 
           status: 0, 
-          
           Internet_Protocol: req.ip, 
-          date: Date.now() 
         }).into('logs')
 
         throw ({
@@ -369,9 +321,7 @@ router.post('/get', async (req, res) => {
         await db.insert({ 
           type: 'get', 
           status: 1, 
-          
           Internet_Protocol: req.ip, 
-          date: Date.now() 
         }).into('logs')
 
         return res.send({
@@ -389,7 +339,7 @@ router.post('/get', async (req, res) => {
       status: 1, 
       
       Internet_Protocol: req.ip, 
-      date: Date.now() 
+       
     }).into('logs')
 
     return res.send({
@@ -416,7 +366,7 @@ router.post('/admin_post_del', async (req, res) => {
         type: 'admin_post_del',
         status: 0,
         Internet_Protocol: req.ip,
-        date: Date.now()
+        
       }).into('logs')
 
       throw({
@@ -432,7 +382,7 @@ router.post('/admin_post_del', async (req, res) => {
         type: 'admin_post_del', 
         status: 0, 
         Internet_Protocol: req.ip, 
-        date: Date.now() 
+         
       }).into('logs')
 
       throw ({
@@ -448,7 +398,7 @@ router.post('/admin_post_del', async (req, res) => {
           type: 'admin_post_del',
           status: 0,
           Internet_Protocol: req.ip,
-          date: Date.now()
+          
         }).into('logs')
 
         throw({
@@ -464,7 +414,7 @@ router.post('/admin_post_del', async (req, res) => {
             type: 'admin_post_del',
             status: 1,
             Internet_Protocol: req.ip,
-            date: Date.now()
+            
           }).into('logs')
 
           await db.update({ status: 0 }).from('bamboo').where({ id: id })
@@ -494,7 +444,7 @@ router.post('/admin_category_inc', async (req, res) => {
         type: 'admin_category_inc',
         status: 0,
         Internet_Protocol: req.ip,
-        date: Date.now()
+        
       }).into('logs')
       
       throw({
@@ -510,7 +460,7 @@ router.post('/admin_category_inc', async (req, res) => {
         type: 'admin_category_inc', 
         status: 0, 
         Internet_Protocol: req.ip, 
-        date: Date.now() 
+         
       }).into('logs')
   
       throw ({
@@ -526,14 +476,14 @@ router.post('/admin_category_inc', async (req, res) => {
         id: ranStr(10, true), 
         title: title, 
         creater: admin.realname+ ', ' + admin.username,
-        date: Date.now() 
+         
       }).into('categorys')
   
       await db.insert({ 
         type: 'admin_category_inc', 
         status: 1, 
         Internet_Protocol: req.ip, 
-        date: Date.now() 
+         
       }).into('logs')
   
       return res.send({
@@ -546,7 +496,7 @@ router.post('/admin_category_inc', async (req, res) => {
         type: 'admin_category_inc', 
         status: 0, 
         Internet_Protocol: req.ip, 
-        date: Date.now() 
+         
       }).into('logs')
 
       throw ({
@@ -574,7 +524,7 @@ router.post('/admin_category_del', async (req, res) => {
         type: 'admin_category_del',
         status: 0,
         Internet_Protocol: req.ip,
-        date: Date.now()
+        
       }).into('logs')
       
       throw({
@@ -590,7 +540,7 @@ router.post('/admin_category_del', async (req, res) => {
         type: 'admin_category_del', 
         status: 0, 
         Internet_Protocol: req.ip, 
-        date: Date.now() 
+         
       }).into('logs')
 
       throw ({
@@ -607,7 +557,7 @@ router.post('/admin_category_del', async (req, res) => {
         type: 'admin_category_del', 
         status: 1, 
         Internet_Protocol: req.ip, 
-        date: Date.now() 
+         
       }).into('logs')
 
       return res.send({
@@ -620,7 +570,7 @@ router.post('/admin_category_del', async (req, res) => {
         type: 'admin_category_del', 
         status: 0,
         Internet_Protocol: req.ip, 
-        date: Date.now() 
+         
       }).into('logs')
 
       throw ({
@@ -648,7 +598,7 @@ router.post('/admin', async (req, res) => {
         type: 'admin',
         status: 0,
         Internet_Protocol: req.ip,
-        date: Date.now()
+        
       }).into('logs')
       
       throw({
@@ -673,7 +623,7 @@ router.post('/admin', async (req, res) => {
           type: 'admin',
           status: 1,
           Internet_Protocol: req.ip, 
-          date: Date.now() 
+           
         }).into('logs')
 
         return res.send({
@@ -686,7 +636,7 @@ router.post('/admin', async (req, res) => {
           type: 'admin',
           status: 0,
           Internet_Protocol: req.ip,
-          date: Date.now()
+          
         }).into('logs')
 
         throw ({
@@ -701,7 +651,7 @@ router.post('/admin', async (req, res) => {
         type: 'admin', 
         status: 0, 
         Internet_Protocol: req.ip, 
-        date: Date.now() 
+         
       }).into('logs')
 
       throw ({
@@ -729,7 +679,7 @@ router.post('/admin_del', async (req, res) => {
         type: 'admin_del', 
         status: 0, 
         Internet_Protocol: req.ip, 
-        date: Date.now() 
+         
       }).into('logs')
       
       throw({
@@ -746,7 +696,7 @@ router.post('/admin_del', async (req, res) => {
           type: 'admin_del', 
           status: 0, 
           Internet_Protocol: req.ip, 
-          date: Date.now() 
+           
         }).into('logs')
 
         throw ({
@@ -761,7 +711,7 @@ router.post('/admin_del', async (req, res) => {
           type: 'admin_del', 
           status: 1, 
           Internet_Protocol: req.ip, 
-          date: Date.now() 
+           
         }).into('logs')
 
         return res.send({
@@ -776,7 +726,7 @@ router.post('/admin_del', async (req, res) => {
         status: 0, 
         
         Internet_Protocol: req.ip, 
-        date: Date.now() 
+         
       }).into('logs')
 
       throw ({
