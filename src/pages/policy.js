@@ -5,7 +5,6 @@ export const Policy = (props) => {
   return (
     <div className="policyCon container">
       <h2>경북소프트웨어고등학교 대나무숲 시행규칙</h2>
-      
       <br/>
       <h3>제 1조 (목적)</h3>
       본 규칙은 경북소프트웨어고등학교 대나무숲 시행 규칙으로, 대나무숲의 투명한 운영과 종속을 목적으로 한다.

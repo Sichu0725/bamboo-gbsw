@@ -20,7 +20,6 @@ export const Home = () => {
         </p>
         <span>학교생활</span>
       </div>
-      
     </div>
   )
 }
