@@ -1,11 +1,11 @@
 import { Form } from "./form"
 
 export const Home = () => {
-  
   const style1 = {
     fontSize:"18px",
     fontWeight: "ligther"
   }
+
   return (
     <div>
       <Form/>
