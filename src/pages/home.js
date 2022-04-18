@@ -3,7 +3,7 @@ import fetcher from "../utils/fetcher"
 import useSWR from "swr"
 
 export const Home = () => {
-  const { data, error } = useSWR('http://localhost/get', fetcher)
+  const { data, error } = useSWR('http://localhost/get?offset=0', fetcher)
   const style1 = {
     fontSize:"18px",
     fontWeight: "ligther"

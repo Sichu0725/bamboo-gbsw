@@ -8,7 +8,7 @@ export async function Question(Q: string, str: string): Promise<boolean> {
 }
 
 export async function checkQuestion(Q: string) {
-	const [question] = await db.select('*').from('question').where({ id: Q })
+	const [question] = await db.select('*').from('questions').where({ id: Q })
 	if (!question) return false
 	else return true
 }

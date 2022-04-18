@@ -55,45 +55,52 @@ export const Form = () => {
     )
   } else {
     const post = async () => {
-      const res = await fetch('https://bamboo_server.gbsw.hs.kr/upload', {
+      const res = await fetch('http://localhost/upload', {
         method: 'post',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
+          content: values.content,
           category: values.category,
           title: values.title,
-          content: values.content,
           Question_id: data.Question.id,
           Question_Answer: values.Question_Answer,
           password: values.password
         })
       }).then((res) => res.json())
       if (res.Success === true) { 
-        window.location.reload()
+        document.querySelector('.Form_title').value = ''
+        document.querySelector('.Form_auth').value = ''
+        document.querySelector('select').value = 'none'
+        document.querySelector('.Form_content').value = ''
+        document.querySelector('.Form_password').value = ''
+        setValues({ title: '', category: 'none', content: '', Question_Answer: '', password: '' })
         return alert("성공적으로 업로드 되었습니다.") 
-      }
-      else { 
-        window.location.reload()
-        return alert("업로드 실패")
+      } else {
+        return alert("업로드 실패\n사유: " + res.reason)
       }
     }
-    console.log(data.Question)
+    
     return (
       <div className="form container">
-        <input name="title" placeholder="제목을 입력하세요." onChange={(e) => setValues({ title: e.target.value })} />
-        <input name="auth" placeholder={data.Question.question} />
-        <select onChange={(e) => setValues({ category: e.target.value })}>
+        <input name="title" className="Form_title" placeholder="제목을 입력하세요." onChange={(e) => setValues({ title: e.target.value, content: values.content, category: values.category, password: values.password, Question_Answer: values.Question_Answer })} />
+        <input name="auth" className="Form_auth" placeholder={data.Question.question} onChange={(e) => setValues({ Question_Answer: e.target.value, title: values.title, content: values.content, category: values.category, password: values.password })} />
+        <select onChange={(e) => setValues({ category: e.target.value, title: values.title, content: values.content, password: values.password, Question_Answer: values.Question_Answer })}>
           <option value="none" selected>태그선택</option>
           {Object.values(data.category).map((category) => (
             <option key={1} value={category.title}>{category.title}</option>
           ))}
         </select>
-        <textarea onChange={(e) => setValues({ content: e.target.value })}
+        <textarea onChange={(e) => setValues({ content: e.target.value, title: values.title, category: values.category, password: values.password, Question_Answer: values.Question_Answer })}
         ref={contentsRef}
         placeholder="타인에 대한 비속어는 제재대상 입니다." 
         onKeyUp={autoSize}
-        onKeyDown={autoSize} />
+        onKeyDown={autoSize}
+        className="Form_content" />
         <br/>
-        <input name="password" placeholder="비밀번호" onChange={(e) => setValues({ password: e.target.value})} /><br/>
-        <button className="post-btn" onClick='' style={style1}>제보하기</button>
+        <input type="password" name="password" className="Form_password" placeholder="비밀번호" onChange={(e) => setValues({ password: e.target.value, title: values.title, content: values.content, category: values.category, Question_Answer: values.Question_Answer })} /><br/>
+        <button className="post-btn" onClick={post} style={style1}>제보하기</button>
       </div>
     )
   }

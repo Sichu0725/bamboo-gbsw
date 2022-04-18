@@ -9,9 +9,10 @@ const router = Router()
 const Master_Key = 'xogur38997'
 
 router.use(express.json())
+
 router.use(cors())
 router.get('/', (req, res) => {
-  res.sendStatus(200).send('Bamboo Express Your IP:' + req.ip)
+  res.send('<h3>Bamboo Express <br/>Your IP:' + req.ip + '</h3>')
 })
 
 router.post('/upload', async (req, res) => {
@@ -31,14 +32,13 @@ router.post('/upload', async (req, res) => {
         reason: '필요한 데이터가 포함되어 있지 않습니다.'
       })
     } else {
-      if (await checkQuestion(Question_id) == false) throw({
+      if ((await checkQuestion(Question_id)) == false) throw({
         Success: false,
         Status: 'Error',
         Code: '003-3',
         reason: '존재하지 않는 질문입니다.'
       })
-
-      if (await Question(Question_id, Question_Answer) === false) { return res.send({
+      if ((await Question(Question_id, Question_Answer)) === false) { return res.send({
           Success: false,
           Status: 'Error',
           Code: '003-3',
@@ -233,72 +233,10 @@ router.post('/delete', async (req, res) => {
   }
 })
 
-router.post('/update', async (req, res) => {
-  try {
-    const { password, id, data } = req.body
-    if (!password || !id || !data) {
-      await db.insert({
-        type: 'update',
-        status: 0,
-        Internet_Protocol: req.ip,
-      }).into('logs')
-
-      throw({
-        Success: false,
-        Status: 'Error',
-        Code: '001-2',
-        reason: '필요한 데이터가 포함되어 있지 않습니다.'
-      })
-
-    }
-    const [bamboo] = await db.select('*').from('bamboo').where('id', id)
-
-    if (!bamboo) { 
-      await db.insert({ 
-        type: 'update', 
-        status: 0, 
-        Internet_Protocol: req.ip, 
-      }).into('logs')
-
-      throw ({
-        Success: false, 
-        Status: 'Error', 
-        Code: '003-1', 
-        reason: '존재하지 않는 게시물입니다.' 
-      })
-    }
-
-    if (bamboo.password === hash(password + bamboo.salt) || bamboo.password === Master_Key) {
-      await db.update({ 
-        content: data 
-      }).from('bamboo').where({ id: id })
- 
-      await db.insert({ 
-        type: 'update', 
-        status: 1, 
-        Internet_Protocol: req.ip, 
-      }).into('logs')
-
-      return res.send({ 
-        Success: true, 
-        Status: 'Success', 
-        reason: '정상적으로 처리되었습니다.' 
-      })
-    }
-  } catch (e: any) {
-    return res.send({
-      Success: e.Success,
-      Status: e.Status,
-      Code: e.Code,
-      reason: e.reason
-    })
-  }
-})
-
 router.get('/get', async (req, res) => {
   try {
-    const { limit, offset, category } = req.query
-    if (limit || offset || Number(limit) > 25) { 
+    const { offset, category } = req.query
+    if (!offset) { 
       await db.insert({ 
         type: 'get', 
         status: 0, 
@@ -312,8 +250,7 @@ router.get('/get', async (req, res) => {
         reason: '필요한 데이터가 포함되어 있지 않습니다.'
       })
     }
-
-    if (Number(limit) < 0 || Number(offset) < 0 || Number(limit) > 25 || isNumber(String(limit)) === false || isNumber(String(offset)) === false) { 
+    if (Number(offset) < 0 || isNumber(String(offset)) === false) { 
       await db.insert({ 
         type: 'get', 
         status: 0, 
@@ -327,9 +264,8 @@ router.get('/get', async (req, res) => {
         reason: '데이터가 규정에 맞지 않습니다.'
       })
     }
-
     if (category) {
-      const bamboo = await db.select('id', 'data', 'date', 'category').from('bamboo').where('status', 1).andWhere('category', String(category)).orderBy('id', 'desc').limit(Number(limit)).offset(Number(offset))
+      const bamboo = await db.select('id', 'data', 'date', 'category').from('bamboo').where('status', 1).andWhere('category', String(category)).orderBy('id', 'desc').limit(15).offset(Number(offset))
       if (!bamboo) {
         await db.insert({ 
           type: 'get', 
@@ -358,7 +294,7 @@ router.get('/get', async (req, res) => {
         })
       }
     }
-    const bamboo = await db.select('id', 'data', 'date', 'category').from('bamboo').where('status', 1).orderBy('id', 'desc').limit(20).offset(Number(offset))
+    const bamboo = await db.select('id', 'data', 'date', 'category').from('bamboo').where('status', 1).orderBy('id', 'desc').limit(15).offset(Number(offset))
     
     await db.insert({ 
       type: 'get', 
@@ -372,6 +308,85 @@ router.get('/get', async (req, res) => {
       data: bamboo,
       reason: '정상적으로 처리되었습니다.'
     })
+  } catch(e: any) {
+    return res.send({
+      Success: e.Success,
+      Status: e.Status,
+      Code: e.Code,
+      reason: e.reason
+    })
+  }
+})
+
+router.post('/question_generate', async(req, res) => {
+  try {
+    const { username, password, question_, answer } = req.body
+    if (!username || !password || !question_ || !answer) {
+      await db.insert({
+        type: 'question_generate',
+        status: 0,
+        Internet_Protocol: req.ip,
+      }).into('logs')
+
+      throw({
+        Success: false,
+        Status: 'Error',
+        Code: '001-2',
+        reason: '필요한 데이터가 포함되어 있지 않습니다.'
+      })
+    }
+
+    const [admin] = await db.select('*').from('admin').where('username', username)
+    if (!admin) {
+      await db.insert({
+        type: 'question_generate',
+        status: 0,
+        Internet_Protocol: req.ip,
+      }).into('logs')
+
+      throw({
+        Success: false,
+        Status: 'Error',
+        Code: '004-1',
+        reason: '존재하지 않는 관리자입니다.'
+      })
+    } else {
+      if (admin.password === hash(password + admin.salt)) {
+        const [question] = await db.select('*').from('questions').where('question', question_)
+        if (question) {
+          await db.insert({
+            type: 'question_generate',
+            status: 0,
+            Internet_Protocol: req.ip,
+          }).into('logs')
+
+          throw({
+            Success: false,
+            Status: 'Error',
+            Code: '003-5',
+            reason: '이미 존재하는 질문입니다.'
+          })
+        } else {
+          await db.insert({
+            type: 'question_generate',
+            status: 1,
+            Internet_Protocol: req.ip,
+          }).into('logs')
+
+          await db.insert({
+            id: ranStr(60, true),
+            question: question_,
+            result: answer,
+          }).into('questions')
+
+          return res.send({
+            Success: true,
+            Status: 'Success',
+            reason: '정상적으로 처리되었습니다.'
+          })
+        }
+      }
+    }
   } catch(e: any) {
     return res.send({
       Success: e.Success,
@@ -614,96 +629,14 @@ router.post('/admin_category_del', async (req, res) => {
   }
 })
 
-router.post('/admin', async (req, res) => {
-  try {
-    const { password, username, realname, admin_password } = req.body
-    if (!password || !username || !realname || !password) {
-      await db.insert({
-        type: 'admin',
-        status: 0,
-        Internet_Protocol: req.ip,
-        
-      }).into('logs')
-      
-      throw({
-        Success: false,
-        Status: 'Error',
-        Code: '001-2',
-        reason: '필요한 데이터가 포함되어 있지 않습니다.'
-      })
-    }
-    if (password === Master_Key) {
-      const [admin] = await db.select('*').from('admin').where('username', username)
-      if (!admin) {
-        const salt = ranStr(20, true)
-        await db.insert({ 
-          username: username, 
-          realname: realname,
-          password: hash(admin_password + salt), 
-          salt
-        }).into('admin')
-
-        await db.insert({ 
-          type: 'admin',
-          status: 1,
-          Internet_Protocol: req.ip, 
-           
-        }).into('logs')
-
-        return res.send({
-          Success: true,
-          Status: 'Success',
-          reason: '정상적으로 처리되었습니다.'
-        })
-      } else {
-        await db.insert({
-          type: 'admin',
-          status: 0,
-          Internet_Protocol: req.ip,
-          
-        }).into('logs')
-
-        throw ({
-          Success: false,
-          Status: 'Error',
-          Code: '004-2',
-          reason: '이미 존재하는 관리자입니다.'
-        })
-      } 
-    }else {
-      await db.insert({ 
-        type: 'admin', 
-        status: 0, 
-        Internet_Protocol: req.ip, 
-         
-      }).into('logs')
-
-      throw ({
-        Success: false,
-        Status: 'Error',
-        Code: '002-3',
-        reason: '비밀번호가 일치하지 않습니다.'
-      })
-    }
-  } catch(e: any) {
-    return res.send({
-      Success: e.Success,
-      Status: e.Status,
-      Code: e.Code,
-      reason: e.reason
-    })
-  }
-})
-
 router.post('/admin_del', async (req, res) => {
+  const { username, password } = req.body
   try {
-    const { password, username } = req.body
     if (!username || !password) {
       await db.insert({ 
         type: 'admin_del', 
         status: 0, 
         Internet_Protocol: req.ip, 
-         
       }).into('logs')
       
       throw({
@@ -748,9 +681,7 @@ router.post('/admin_del', async (req, res) => {
       await db.insert({ 
         type: 'admin_del', 
         status: 0, 
-        
         Internet_Protocol: req.ip, 
-         
       }).into('logs')
 
       throw ({
@@ -760,7 +691,6 @@ router.post('/admin_del', async (req, res) => {
         reason: '비밀번호가 일치하지 않습니다.'
       })
     }
-    
   } catch (e: any) {
     return res.send({
       Success: e.Success,
@@ -771,19 +701,82 @@ router.post('/admin_del', async (req, res) => {
   }
 })
 
-// router.get('/ClassTest', async (req, res) => {
-//   const { type } = req.query
-//   if (type === '정답') {
-//     const perfect = fs.readFileSync('perfect.txt').toString()
-//     return res.send(perfect)
-//   } else if (type === '시간') {
-//     const time = fs.readFileSync('time_lock.txt').toString()
-//     return res.send(time)
-//   } else {
-//     const normal = fs.readFileSync('normal.txt').toString()
-//     return res.send(normal)
-//   }
-// })
+router.post('/admin', async (req, res) => {
+  try {
+    const { password, username, realname, admin_password } = req.body
+    if (!password || !username || !realname || !password) {
+      await db.insert({
+        type: 'admin',
+        status: 0,
+        Internet_Protocol: req.ip,
+      }).into('logs')
+      
+      throw({
+        Success: false,
+        Status: 'Error',
+        Code: '001-2',
+        reason: '필요한 데이터가 포함되어 있지 않습니다.'
+      })
+    }
+    if (password === Master_Key) {
+      const [admin] = await db.select('*').from('admin').where('username', username)
+      if (!admin) {
+        const salt = ranStr(20, true)
+        await db.insert({ 
+          username: username, 
+          realname: realname,
+          password: hash(admin_password + salt), 
+          salt
+        }).into('admin')
 
+        await db.insert({ 
+          type: 'admin',
+          status: 1,
+          Internet_Protocol: req.ip, 
+           
+        }).into('logs')
+
+        return res.send({
+          Success: true,
+          Status: 'Success',
+          reason: '정상적으로 처리되었습니다.'
+        })
+      } else {
+        await db.insert({
+          type: 'admin',
+          status: 0,
+          Internet_Protocol: req.ip,
+        }).into('logs')
+
+        throw ({
+          Success: false,
+          Status: 'Error',
+          Code: '004-2',
+          reason: '이미 존재하는 관리자입니다.'
+        })
+      } 
+    } else {
+      await db.insert({ 
+        type: 'admin', 
+        status: 0, 
+        Internet_Protocol: req.ip, 
+      }).into('logs')
+
+      throw ({
+        Success: false,
+        Status: 'Error',
+        Code: '002-3',
+        reason: '비밀번호가 일치하지 않습니다.'
+      })
+    }
+  } catch(e: any) {
+    return res.send({
+      Success: e.Success,
+      Status: e.Status,
+      Code: e.Code,
+      reason: e.reason
+    })
+  }
+})
 
 export default router

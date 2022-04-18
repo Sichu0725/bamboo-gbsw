@@ -70,7 +70,7 @@ var Master_Key = 'xogur38997';
 router.use(express_1.default.json());
 router.use(cors_1.default());
 router.get('/', function (req, res) {
-    res.sendStatus(200).send('Bamboo Express Your IP:' + req.ip);
+    res.send('<h3>Bamboo Express <br/>Your IP:' + req.ip + '</h3>');
 });
 router.post('/upload', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var _a, content, category, title, Question_id, Question_Answer, password, category_, salt, e_1;
@@ -339,84 +339,14 @@ router.post('/delete', function (req, res) { return __awaiter(void 0, void 0, vo
         }
     });
 }); });
-router.post('/update', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, password, id, data, bamboo, e_5;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                _b.trys.push([0, 9, , 10]);
-                _a = req.body, password = _a.password, id = _a.id, data = _a.data;
-                if (!(!password || !id || !data)) return [3 /*break*/, 2];
-                return [4 /*yield*/, database_1.db.insert({
-                        type: 'update',
-                        status: 0,
-                        Internet_Protocol: req.ip,
-                    }).into('logs')];
-            case 1:
-                _b.sent();
-                throw ({
-                    Success: false,
-                    Status: 'Error',
-                    Code: '001-2',
-                    reason: '필요한 데이터가 포함되어 있지 않습니다.'
-                });
-            case 2: return [4 /*yield*/, database_1.db.select('*').from('bamboo').where('id', id)];
-            case 3:
-                bamboo = (_b.sent())[0];
-                if (!!bamboo) return [3 /*break*/, 5];
-                return [4 /*yield*/, database_1.db.insert({
-                        type: 'update',
-                        status: 0,
-                        Internet_Protocol: req.ip,
-                    }).into('logs')];
-            case 4:
-                _b.sent();
-                throw ({
-                    Success: false,
-                    Status: 'Error',
-                    Code: '003-1',
-                    reason: '존재하지 않는 게시물입니다.'
-                });
-            case 5:
-                if (!(bamboo.password === hash_1.default(password + bamboo.salt) || bamboo.password === Master_Key)) return [3 /*break*/, 8];
-                return [4 /*yield*/, database_1.db.update({
-                        content: data
-                    }).from('bamboo').where({ id: id })];
-            case 6:
-                _b.sent();
-                return [4 /*yield*/, database_1.db.insert({
-                        type: 'update',
-                        status: 1,
-                        Internet_Protocol: req.ip,
-                    }).into('logs')];
-            case 7:
-                _b.sent();
-                return [2 /*return*/, res.send({
-                        Success: true,
-                        Status: 'Success',
-                        reason: '정상적으로 처리되었습니다.'
-                    })];
-            case 8: return [3 /*break*/, 10];
-            case 9:
-                e_5 = _b.sent();
-                return [2 /*return*/, res.send({
-                        Success: e_5.Success,
-                        Status: e_5.Status,
-                        Code: e_5.Code,
-                        reason: e_5.reason
-                    })];
-            case 10: return [2 /*return*/];
-        }
-    });
-}); });
 router.get('/get', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, limit, offset, category, bamboo_1, bamboo, e_6;
+    var _a, offset, category, bamboo_1, bamboo, e_5;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 _b.trys.push([0, 12, , 13]);
-                _a = req.query, limit = _a.limit, offset = _a.offset, category = _a.category;
-                if (!(limit || offset || Number(limit) > 25)) return [3 /*break*/, 2];
+                _a = req.query, offset = _a.offset, category = _a.category;
+                if (!!offset) return [3 /*break*/, 2];
                 return [4 /*yield*/, database_1.db.insert({
                         type: 'get',
                         status: 0,
@@ -431,7 +361,7 @@ router.get('/get', function (req, res) { return __awaiter(void 0, void 0, void 0
                     reason: '필요한 데이터가 포함되어 있지 않습니다.'
                 });
             case 2:
-                if (!(Number(limit) < 0 || Number(offset) < 0 || Number(limit) > 25 || isNumber_1.default(String(limit)) === false || isNumber_1.default(String(offset)) === false)) return [3 /*break*/, 4];
+                if (!(Number(offset) < 0 || isNumber_1.default(String(offset)) === false)) return [3 /*break*/, 4];
                 return [4 /*yield*/, database_1.db.insert({
                         type: 'get',
                         status: 0,
@@ -447,7 +377,7 @@ router.get('/get', function (req, res) { return __awaiter(void 0, void 0, void 0
                 });
             case 4:
                 if (!category) return [3 /*break*/, 9];
-                return [4 /*yield*/, database_1.db.select('id', 'data', 'date', 'category').from('bamboo').where('status', 1).andWhere('category', String(category)).orderBy('id', 'desc').limit(Number(limit)).offset(Number(offset))];
+                return [4 /*yield*/, database_1.db.select('id', 'data', 'date', 'category').from('bamboo').where('status', 1).andWhere('category', String(category)).orderBy('id', 'desc').limit(15).offset(Number(offset))];
             case 5:
                 bamboo_1 = _b.sent();
                 if (!!bamboo_1) return [3 /*break*/, 7];
@@ -477,7 +407,7 @@ router.get('/get', function (req, res) { return __awaiter(void 0, void 0, void 0
                         bamboo: bamboo_1,
                         reason: '정상적으로 처리되었습니다.'
                     })];
-            case 9: return [4 /*yield*/, database_1.db.select('id', 'data', 'date', 'category').from('bamboo').where('status', 1).orderBy('id', 'desc').limit(20).offset(Number(offset))];
+            case 9: return [4 /*yield*/, database_1.db.select('id', 'data', 'date', 'category').from('bamboo').where('status', 1).orderBy('id', 'desc').limit(15).offset(Number(offset))];
             case 10:
                 bamboo = _b.sent();
                 return [4 /*yield*/, database_1.db.insert({
@@ -493,6 +423,95 @@ router.get('/get', function (req, res) { return __awaiter(void 0, void 0, void 0
                         data: bamboo,
                         reason: '정상적으로 처리되었습니다.'
                     })];
+            case 12:
+                e_5 = _b.sent();
+                return [2 /*return*/, res.send({
+                        Success: e_5.Success,
+                        Status: e_5.Status,
+                        Code: e_5.Code,
+                        reason: e_5.reason
+                    })];
+            case 13: return [2 /*return*/];
+        }
+    });
+}); });
+router.post('/question_generate', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, username, password, question_, answer, admin, question, e_6;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 12, , 13]);
+                _a = req.body, username = _a.username, password = _a.password, question_ = _a.question_, answer = _a.answer;
+                if (!(!username || !password || !question_ || !answer)) return [3 /*break*/, 2];
+                return [4 /*yield*/, database_1.db.insert({
+                        type: 'question_generate',
+                        status: 0,
+                        Internet_Protocol: req.ip,
+                    }).into('logs')];
+            case 1:
+                _b.sent();
+                throw ({
+                    Success: false,
+                    Status: 'Error',
+                    Code: '001-2',
+                    reason: '필요한 데이터가 포함되어 있지 않습니다.'
+                });
+            case 2: return [4 /*yield*/, database_1.db.select('*').from('admin').where('username', username)];
+            case 3:
+                admin = (_b.sent())[0];
+                if (!!admin) return [3 /*break*/, 5];
+                return [4 /*yield*/, database_1.db.insert({
+                        type: 'question_generate',
+                        status: 0,
+                        Internet_Protocol: req.ip,
+                    }).into('logs')];
+            case 4:
+                _b.sent();
+                throw ({
+                    Success: false,
+                    Status: 'Error',
+                    Code: '004-1',
+                    reason: '존재하지 않는 관리자입니다.'
+                });
+            case 5:
+                if (!(admin.password === hash_1.default(password + admin.salt))) return [3 /*break*/, 11];
+                return [4 /*yield*/, database_1.db.select('*').from('questions').where('question', question_)];
+            case 6:
+                question = (_b.sent())[0];
+                if (!question) return [3 /*break*/, 8];
+                return [4 /*yield*/, database_1.db.insert({
+                        type: 'question_generate',
+                        status: 0,
+                        Internet_Protocol: req.ip,
+                    }).into('logs')];
+            case 7:
+                _b.sent();
+                throw ({
+                    Success: false,
+                    Status: 'Error',
+                    Code: '003-5',
+                    reason: '이미 존재하는 질문입니다.'
+                });
+            case 8: return [4 /*yield*/, database_1.db.insert({
+                    type: 'question_generate',
+                    status: 1,
+                    Internet_Protocol: req.ip,
+                }).into('logs')];
+            case 9:
+                _b.sent();
+                return [4 /*yield*/, database_1.db.insert({
+                        id: ranStr_1.default(60, true),
+                        question: question_,
+                        result: answer,
+                    }).into('questions')];
+            case 10:
+                _b.sent();
+                return [2 /*return*/, res.send({
+                        Success: true,
+                        Status: 'Success',
+                        reason: '정상적으로 처리되었습니다.'
+                    })];
+            case 11: return [3 /*break*/, 13];
             case 12:
                 e_6 = _b.sent();
                 return [2 /*return*/, res.send({
@@ -756,8 +775,92 @@ router.post('/admin_category_del', function (req, res) { return __awaiter(void 0
         }
     });
 }); });
+router.post('/admin_delete', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, username, password, admin, e_10;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _a = req.body, username = _a.username, password = _a.password;
+                _b.label = 1;
+            case 1:
+                _b.trys.push([1, 13, , 14]);
+                if (!(!username || !password)) return [3 /*break*/, 3];
+                return [4 /*yield*/, database_1.db.insert({
+                        type: 'admin_del',
+                        status: 0,
+                        Internet_Protocol: req.ip,
+                    }).into('logs')];
+            case 2:
+                _b.sent();
+                throw ({
+                    Success: false,
+                    Status: 'Error',
+                    Code: '001-2',
+                    reason: '필요한 데이터가 포함되어 있지 않습니다.'
+                });
+            case 3:
+                if (!(password === Master_Key)) return [3 /*break*/, 10];
+                return [4 /*yield*/, database_1.db.select('*').from('admin').where('username', username)];
+            case 4:
+                admin = (_b.sent())[0];
+                if (!!admin) return [3 /*break*/, 6];
+                return [4 /*yield*/, database_1.db.insert({
+                        type: 'admin_del',
+                        status: 0,
+                        Internet_Protocol: req.ip,
+                    }).into('logs')];
+            case 5:
+                _b.sent();
+                throw ({
+                    Success: false,
+                    Status: 'Error',
+                    Code: '004-1',
+                    reason: '존재하지 않는 관리자입니다.'
+                });
+            case 6: return [4 /*yield*/, database_1.db.delete().from('admin').where('username', username)];
+            case 7:
+                _b.sent();
+                return [4 /*yield*/, database_1.db.insert({
+                        type: 'admin_del',
+                        status: 1,
+                        Internet_Protocol: req.ip,
+                    }).into('logs')];
+            case 8:
+                _b.sent();
+                return [2 /*return*/, res.send({
+                        Success: true,
+                        Status: 'Success',
+                        reason: '정상적으로 처리되었습니다.'
+                    })];
+            case 9: return [3 /*break*/, 12];
+            case 10: return [4 /*yield*/, database_1.db.insert({
+                    type: 'admin_del',
+                    status: 0,
+                    Internet_Protocol: req.ip,
+                }).into('logs')];
+            case 11:
+                _b.sent();
+                throw ({
+                    Success: false,
+                    Status: 'Error',
+                    Code: '002-3',
+                    reason: '비밀번호가 일치하지 않습니다.'
+                });
+            case 12: return [3 /*break*/, 14];
+            case 13:
+                e_10 = _b.sent();
+                return [2 /*return*/, res.send({
+                        Success: e_10.Success,
+                        Status: e_10.Status,
+                        Code: e_10.Code,
+                        reason: e_10.reason
+                    })];
+            case 14: return [2 /*return*/];
+        }
+    });
+}); });
 router.post('/admin', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, password, username, realname, admin_password, admin, salt, e_10;
+    var _a, password, username, realname, admin_password, admin, salt, e_11;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -833,88 +936,6 @@ router.post('/admin', function (req, res) { return __awaiter(void 0, void 0, voi
                 });
             case 11: return [3 /*break*/, 13];
             case 12:
-                e_10 = _b.sent();
-                return [2 /*return*/, res.send({
-                        Success: e_10.Success,
-                        Status: e_10.Status,
-                        Code: e_10.Code,
-                        reason: e_10.reason
-                    })];
-            case 13: return [2 /*return*/];
-        }
-    });
-}); });
-router.post('/admin_del', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, password, username, admin, e_11;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                _b.trys.push([0, 12, , 13]);
-                _a = req.body, password = _a.password, username = _a.username;
-                if (!(!username || !password)) return [3 /*break*/, 2];
-                return [4 /*yield*/, database_1.db.insert({
-                        type: 'admin_del',
-                        status: 0,
-                        Internet_Protocol: req.ip,
-                    }).into('logs')];
-            case 1:
-                _b.sent();
-                throw ({
-                    Success: false,
-                    Status: 'Error',
-                    Code: '001-2',
-                    reason: '필요한 데이터가 포함되어 있지 않습니다.'
-                });
-            case 2:
-                if (!(password === Master_Key)) return [3 /*break*/, 9];
-                return [4 /*yield*/, database_1.db.select('*').from('admin').where('username', username)];
-            case 3:
-                admin = (_b.sent())[0];
-                if (!!admin) return [3 /*break*/, 5];
-                return [4 /*yield*/, database_1.db.insert({
-                        type: 'admin_del',
-                        status: 0,
-                        Internet_Protocol: req.ip,
-                    }).into('logs')];
-            case 4:
-                _b.sent();
-                throw ({
-                    Success: false,
-                    Status: 'Error',
-                    Code: '004-1',
-                    reason: '존재하지 않는 관리자입니다.'
-                });
-            case 5: return [4 /*yield*/, database_1.db.delete().from('admin').where('username', username)];
-            case 6:
-                _b.sent();
-                return [4 /*yield*/, database_1.db.insert({
-                        type: 'admin_del',
-                        status: 1,
-                        Internet_Protocol: req.ip,
-                    }).into('logs')];
-            case 7:
-                _b.sent();
-                return [2 /*return*/, res.send({
-                        Success: true,
-                        Status: 'Success',
-                        reason: '정상적으로 처리되었습니다.'
-                    })];
-            case 8: return [3 /*break*/, 11];
-            case 9: return [4 /*yield*/, database_1.db.insert({
-                    type: 'admin_del',
-                    status: 0,
-                    Internet_Protocol: req.ip,
-                }).into('logs')];
-            case 10:
-                _b.sent();
-                throw ({
-                    Success: false,
-                    Status: 'Error',
-                    Code: '002-3',
-                    reason: '비밀번호가 일치하지 않습니다.'
-                });
-            case 11: return [3 /*break*/, 13];
-            case 12:
                 e_11 = _b.sent();
                 return [2 /*return*/, res.send({
                         Success: e_11.Success,
@@ -926,17 +947,4 @@ router.post('/admin_del', function (req, res) { return __awaiter(void 0, void 0,
         }
     });
 }); });
-// router.get('/ClassTest', async (req, res) => {
-//   const { type } = req.query
-//   if (type === '정답') {
-//     const perfect = fs.readFileSync('perfect.txt').toString()
-//     return res.send(perfect)
-//   } else if (type === '시간') {
-//     const time = fs.readFileSync('time_lock.txt').toString()
-//     return res.send(time)
-//   } else {
-//     const normal = fs.readFileSync('normal.txt').toString()
-//     return res.send(normal)
-//   }
-// })
 exports.default = router;

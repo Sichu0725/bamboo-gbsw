@@ -67,7 +67,7 @@ function checkQuestion(Q) {
         var question;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, database_1.db.select('*').from('question').where({ id: Q })];
+                case 0: return [4 /*yield*/, database_1.db.select('*').from('questions').where({ id: Q })];
                 case 1:
                     question = (_a.sent())[0];
                     if (!question)
@@ -88,7 +88,6 @@ function getQuestion() {
                 case 0: return [4 /*yield*/, database_1.db.select('id', 'question').from('questions').orderByRaw('RAND()').limit(1)];
                 case 1:
                     question = (_a.sent())[0];
-                    console.log(question);
                     return [2 /*return*/, { Question: { id: question.id, question: question.question } }];
             }
         });
