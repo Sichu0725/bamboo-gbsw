@@ -3,10 +3,10 @@ import knex from 'knex'
 export const db = knex({
     client: "mysql",
     connection: {
-        host: 'terminal.kro.kr',
+        host: 's',
         port: 3306,
-        user: 'cth',
-        password: 'xogur38997',
+        user: 's',
+        password: 's',
 		database: 'bamboo'
     }
 })
